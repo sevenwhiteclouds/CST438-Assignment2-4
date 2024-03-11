@@ -174,9 +174,18 @@ public class AssignmentController {
         // for each grade in the GradeDTO list, retrieve the grade entity
         // update the score and save the entity
 
+        for (int i = 0; i < dlist.size(); i++) {
+            Grade g = gradeRepository.findById(dlist.get(i).gradeId()).orElse(null);
+            if (g == null) {
+                throw new ResponseStatusException( HttpStatus.NOT_FOUND, "grade not found ");
+            }
+            else {
+                g.setScore(dlist.get(i).score());
+                gradeRepository.save(g);
+            }
+        }
+
     }
-
-
 
     // student lists their assignments/grades for an enrollment ordered by due date
     // student must be enrolled in the section
