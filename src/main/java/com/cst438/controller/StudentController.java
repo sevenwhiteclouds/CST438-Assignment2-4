@@ -33,6 +33,10 @@ public class StudentController {
        // user must be a student
        // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
        // irrelevant fields set to null to only return course_id, sec_id, title, credit, and grade
+       if (!isStudent(studentId)) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
+
        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId);
        List<EnrollmentDTO> dto_list = new ArrayList<>();
        for(Enrollment e : enrollments) {
