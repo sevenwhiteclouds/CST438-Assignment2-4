@@ -123,6 +123,9 @@ public class AssignmentController {
         if (a!=null) {
             assignmentRepository.delete(a);
         }
+        else {
+            throw new ResponseStatusException( HttpStatus.NOT_FOUND, "assignment not found ");
+        }
     }
 
     // instructor gets grades for assignment ordered by student name
@@ -140,28 +143,31 @@ public class AssignmentController {
         //   and then save the new entity
 
         Assignment a = assignmentRepository.findById(assignmentId).orElse(null);
-        int assignmentSectionId = a.getSection().getSectionNo();
-        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(assignmentSectionId);
+        if (a != null) {
+            int assignmentSectionId = a.getSection().getSectionNo();
+            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(assignmentSectionId);
 
-        List<GradeDTO> grade_list = new ArrayList<>();
+            List<GradeDTO> grade_list = new ArrayList<>();
 
-        for (Enrollment e : enrollments) {
-            Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), assignmentId);
-            if (grade != null) {
-                grade_list.add(new GradeDTO(grade.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
-                        a.getSection().getCourse().getCourseId(), assignmentSectionId, grade.getScore()));
+            for (Enrollment e : enrollments) {
+                Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), assignmentId);
+                if (grade != null) {
+                    grade_list.add(new GradeDTO(grade.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
+                            a.getSection().getCourse().getCourseId(), assignmentSectionId, grade.getScore()));
+                } else {
+                    Grade g = new Grade();
+                    g.setScore(null);
+                    g.setAssignment(assignmentRepository.findById(assignmentId).orElse(null));
+                    g.setEnrollment(e);
+                    grade_list.add(new GradeDTO(g.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
+                            a.getSection().getCourse().getCourseId(), assignmentSectionId, g.getScore()));
+                }
             }
-            else {
-                Grade g = new Grade();
-                g.setScore(null);
-                g.setAssignment(assignmentRepository.findById(assignmentId).orElse(null));
-                g.setEnrollment(e);
-                grade_list.add(new GradeDTO(g.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
-                        a.getSection().getCourse().getCourseId(), assignmentSectionId, g.getScore()));
-            }
+            return grade_list;
         }
-
-        return grade_list;
+        else {
+            throw new ResponseStatusException( HttpStatus.NOT_FOUND, "assignment not found ");
+        }
     }
 
     // instructor uploads grades for assignment
@@ -200,6 +206,27 @@ public class AssignmentController {
         //  for all sections that the student is enrolled for the given year and semester
 		//  hint: use the assignment repository method findByStudentIdAndYearAndSemesterOrderByDueDate
 
-        return null;
+        List<Assignment> assignments =
+                assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
+
+        List<Enrollment> enrollments =
+                enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
+
+        if (assignments.isEmpty() || enrollments.isEmpty()) {
+            throw new ResponseStatusException( HttpStatus.NOT_FOUND, "not found ");
+        }
+
+        List<AssignmentStudentDTO> assignment_grade_list = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            for (Assignment a : assignments) {
+                Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
+                if (grade != null) {
+                    assignment_grade_list.add(new AssignmentStudentDTO(a.getAssignmentId(), a.getTitle(), a.getDueDate(),
+                            a.getSection().getCourse().getCourseId(), a.getSection().getSecId(), grade.getScore()));
+                }
+            }
+        }
+
+        return assignment_grade_list;
     }
 }
