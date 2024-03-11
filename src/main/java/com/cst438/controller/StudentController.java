@@ -61,11 +61,27 @@ public class StudentController {
            @RequestParam("semester") String semester,
            @RequestParam("studentId") int studentId) {
 
+     List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
+     List<EnrollmentDTO> enrollmentList = new ArrayList<>();
 
-     // TODO
-	 //  hint: use enrollment repository method findByYearAndSemesterOrderByCourseId
-     //  remove the following line when done
-       return null;
+     enrollments.forEach(e -> enrollmentList.add(new EnrollmentDTO(
+         e.getEnrollmentId(),
+         e.getGrade(),
+         e.getUser().getId(),
+         e.getUser().getName(),
+         e.getUser().getEmail(),
+         e.getSection().getCourse().getCourseId(),
+         e.getSection().getSecId(),
+         e.getSection().getSectionNo(),
+         e.getSection().getBuilding(),
+         e.getSection().getRoom(),
+         e.getSection().getTimes(),
+         e.getSection().getCourse().getCredits(),
+         e.getSection().getTerm().getYear(),
+         e.getSection().getTerm().getSemester()
+     )));
+
+     return enrollmentList;
    }
 
 
