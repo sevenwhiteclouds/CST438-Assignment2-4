@@ -18,12 +18,6 @@ public class Grade {
     private Enrollment enrollment;
 
     private Integer score;
- 
-    // TODO complete this class
-    // add additional attribute for score
-    // add relationship between grade and assignment entities
-    // add relationship between grade and enrollment entities
-    // add getter/setter methods
 
     public int getGradeId() {
         return gradeId;
