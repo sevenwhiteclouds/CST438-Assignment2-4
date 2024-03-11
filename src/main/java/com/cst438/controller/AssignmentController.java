@@ -21,6 +21,9 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AssignmentController {
 
+    @Autowired
+    AssignmentRepository assignmentRepository;
+
 
     // instructor lists assignments for a section.  Assignments ordered by due date.
     // logged in user must be the instructor for the section
@@ -66,6 +69,12 @@ public class AssignmentController {
     public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
 
         // TODO
+        // MB: Not sure if we can check logged in user's type = INSTRUCTOR at this time?
+        Assignment a = assignmentRepository.findById(assignmentId).orElse(null);
+        // do nothing if assignment does not exist
+        if (a!=null) {
+            assignmentRepository.delete(a);
+        }
     }
 
     // instructor gets grades for assignment ordered by student name
