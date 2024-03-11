@@ -65,7 +65,7 @@ public class StudentController {
            @RequestParam("studentId") int studentId) {
 
        // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
-       if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+       if (!isStudent(studentId)) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
        }
 
@@ -106,7 +106,7 @@ public class StudentController {
         }
 
         // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
-        if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+        if (!isStudent(studentId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
         }
 
@@ -160,8 +160,6 @@ public class StudentController {
    @DeleteMapping("/enrollments/{enrollmentId}")
    public void dropCourse(@PathVariable("enrollmentId") int enrollmentId) {
 
-       Calendar today = Calendar.getInstance();
-
        // Check to make sure enrollment exists
        if (enrollmentRepository.findById(enrollmentId).isEmpty()) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment does not exist.");
@@ -171,10 +169,11 @@ public class StudentController {
        int studentId = enrollmentRepository.findById(enrollmentId).get().getUser().getId();
 
        // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
-       if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+       if (!isStudent(studentId)) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
        }
 
+       Calendar today = Calendar.getInstance();
        Enrollment currentEnrollment = enrollmentRepository.findById(enrollmentId).get();
 
        // Check that today is not after the dropDeadline for section
@@ -185,5 +184,12 @@ public class StudentController {
        // Drops student from course
         enrollmentRepository.delete(currentEnrollment);
 
+   }
+
+   // Checks if user is a student TODO: Likely will need to be changed once login is implemented
+   private boolean isStudent(int userId) {
+       if (userRepository.findById(userId).isEmpty()) {
+           return false;
+       } else return Objects.equals(userRepository.findById(userId).get().getType(), "STUDENT");
    }
 }
