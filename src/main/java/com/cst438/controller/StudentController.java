@@ -17,19 +17,39 @@ import java.util.Optional;
 public class StudentController {
 
 
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
+
    // student gets transcript showing list of all enrollments
    // studentId will be temporary until Login security is implemented
    //example URL  /transcript?studentId=19803
    @GetMapping("/transcripts")
    public List<EnrollmentDTO> getTranscript(@RequestParam("studentId") int studentId) {
 
-       // TODO
-
        // list course_id, sec_id, title, credit, grade in chronological order
        // user must be a student
-	   // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
-       // remove the following line when done
-       return null;
+       // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
+       // irrelevant fields set to null to only return course_id, sec_id, title, credit, and grade
+       List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId);
+       List<EnrollmentDTO> dto_list = new ArrayList<>();
+       for(Enrollment e : enrollments) {
+           dto_list.add(new EnrollmentDTO(
+                   e.getEnrollmentId(),
+                   e.getGrade(),
+                   e.getUser().getId(),
+                   null,
+                   null,
+                   e.getSection().getCourse().getCourseId(),
+                   e.getSection().getSecId(),
+                   e.getSection().getSectionNo(),
+                   null,
+                   null,
+                   null,
+                   e.getSection().getCourse().getCredits(),
+                   0,
+                   null));
+       }
+        return dto_list;
    }
 
     // student gets a list of their enrollments for the given year, semester
