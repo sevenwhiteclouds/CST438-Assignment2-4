@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -19,6 +16,9 @@ public class StudentController {
 
     @Autowired
     EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
    // student gets transcript showing list of all enrollments
    // studentId will be temporary until Login security is implemented
@@ -61,9 +61,14 @@ public class StudentController {
            @RequestParam("semester") String semester,
            @RequestParam("studentId") int studentId) {
 
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
+
        List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
-       List<EnrollmentDTO> enrollmentList = new ArrayList<>();
-       enrollments.forEach(e -> enrollmentList.add(new EnrollmentDTO(
+       List<EnrollmentDTO> enrollmentDTOList = new ArrayList<>();
+       enrollments.forEach(e -> enrollmentDTOList.add(new EnrollmentDTO(
            e.getEnrollmentId(),
            e.getGrade(),
            e.getUser().getId(),
@@ -80,7 +85,7 @@ public class StudentController {
            e.getSection().getTerm().getSemester()
        )));
 
-       return enrollmentList;
+       return enrollmentDTOList;
    }
 
 
