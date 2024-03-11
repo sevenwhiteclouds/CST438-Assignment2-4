@@ -37,7 +37,7 @@ public class StudentController {
                    e.getEnrollmentId(),
                    e.getGrade(),
                    e.getUser().getId(),
-                   null,
+                   e.getSection().getCourse().getTitle(),
                    null,
                    e.getSection().getCourse().getCourseId(),
                    e.getSection().getSecId(),
