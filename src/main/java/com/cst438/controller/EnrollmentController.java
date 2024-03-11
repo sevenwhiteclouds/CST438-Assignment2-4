@@ -34,6 +34,7 @@ public class EnrollmentController {
                     e.getGrade(),
                     e.getUser().getId(),
                     e.getUser().getName(),
+                    e.getSection().getCourse().getTitle(),
                     e.getUser().getEmail(),
                     e.getSection().getCourse().getCourseId(),
                     e.getSection().getSecId(),

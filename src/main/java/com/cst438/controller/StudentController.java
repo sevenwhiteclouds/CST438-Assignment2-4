@@ -40,7 +40,8 @@ public class StudentController {
                    e.getEnrollmentId(),
                    e.getGrade(),
                    e.getUser().getId(),
-                   e.getSection().getCourse().getTitle(),
+                   null,
+                   e.getSection().getCourse().getTitle(), //added title
                    null,
                    e.getSection().getCourse().getCourseId(),
                    e.getSection().getSecId(),
@@ -76,6 +77,7 @@ public class StudentController {
            e.getGrade(),
            e.getUser().getId(),
            e.getUser().getName(),
+           e.getSection().getCourse().getTitle(), // added title
            e.getUser().getEmail(),
            e.getSection().getCourse().getCourseId(),
            e.getSection().getSecId(),
@@ -141,6 +143,7 @@ public class StudentController {
             enrollment.getGrade(),
             enrollment.getUser().getId(),
             enrollment.getUser().getName(),
+            enrollment.getSection().getCourse().getTitle(), // added title
             enrollment.getUser().getEmail(),
             enrollment.getSection().getCourse().getCourseId(),
             enrollment.getSection().getSecId(),
