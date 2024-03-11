@@ -184,7 +184,6 @@ public class AssignmentController {
                 gradeRepository.save(g);
             }
         }
-
     }
 
     // student lists their assignments/grades for an enrollment ordered by due date
