@@ -160,7 +160,30 @@ public class StudentController {
    @DeleteMapping("/enrollments/{enrollmentId}")
    public void dropCourse(@PathVariable("enrollmentId") int enrollmentId) {
 
-       // TODO
-       // check that today is not after the dropDeadline for section
+       Calendar today = Calendar.getInstance();
+
+       // Check to make sure enrollment exists
+       if (enrollmentRepository.findById(enrollmentId).isEmpty()) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment does not exist.");
+       }
+
+       // Gets studentId from the enrollment, Currently being used for student check
+       int studentId = enrollmentRepository.findById(enrollmentId).get().getUser().getId();
+
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
+
+       Enrollment currentEnrollment = enrollmentRepository.findById(enrollmentId).get();
+
+       // Check that today is not after the dropDeadline for section
+       if (today.getTime().after(currentEnrollment.getSection().getTerm().getDropDeadline())) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Current date is beyond the drop deadline.");
+       }
+
+       // Drops student from course
+        enrollmentRepository.delete(currentEnrollment);
+
    }
 }
