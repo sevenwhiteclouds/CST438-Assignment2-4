@@ -25,6 +25,10 @@ public class AssignmentController {
     SectionRepository SectionRepo;
     @Autowired
     AssignmentRepository assignmentRepository;
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
+    @Autowired
+    GradeRepository gradeRepository;
 
     // instructor lists assignments for a section.  Assignments ordered by due date.
     // logged in user must be the instructor for the section
@@ -115,7 +119,27 @@ public class AssignmentController {
         //   if the grade does not exist, create a grade entity and set the score to NULL
         //   and then save the new entity
 
-        return null;
+        Assignment a = assignmentRepository.findById(assignmentId).orElse(null);
+        int assignmentSectionId = a.getSection().getSectionNo();
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(assignmentSectionId);
+
+        List<GradeDTO> grade_list = new ArrayList<>();
+
+        for (Enrollment e : enrollments) {
+            Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), assignmentId);
+            if (grade != null) {
+                grade_list.add(new GradeDTO(grade.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
+                        a.getSection().getCourse().getCourseId(), assignmentSectionId, grade.getScore()));
+            }
+            else {
+                Grade g = new Grade();
+                g.setScore(0); // Ask Prof how this can be set to null if score is type int
+                g.setAssignment(assignmentRepository.findById(assignmentId).orElse(null));
+                g.setEnrollment(e);
+            }
+        }
+
+        return grade_list;
     }
 
     // instructor uploads grades for assignment
