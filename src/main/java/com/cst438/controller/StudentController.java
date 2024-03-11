@@ -45,7 +45,7 @@ public class StudentController {
                    e.getGrade(),
                    e.getUser().getId(),
                    null,
-                   e.getSection().getCourse().getTitle(), //added title
+                   e.getSection().getCourse().getTitle(),
                    null,
                    e.getSection().getCourse().getCourseId(),
                    e.getSection().getSecId(),
@@ -81,7 +81,7 @@ public class StudentController {
            e.getGrade(),
            e.getUser().getId(),
            e.getUser().getName(),
-           e.getSection().getCourse().getTitle(), // added title
+           e.getSection().getCourse().getTitle(),
            e.getUser().getEmail(),
            e.getSection().getCourse().getCourseId(),
            e.getSection().getSecId(),
@@ -106,7 +106,6 @@ public class StudentController {
 		    @PathVariable int sectionNo,
             @RequestParam("studentId") int studentId ) {
 
-        // SectionNo check
         if (sectionRepository.findById(sectionNo).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This section does not exist.");
         }
@@ -122,14 +121,12 @@ public class StudentController {
 
         Calendar today = Calendar.getInstance();
 
-        // Date Check. Checks to make sure the current date is between both the add date and add deadline.
         if (today.getTime().before(s.getTerm().getAddDate())){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add date for this section hasn't started yet.");
         } else if (today.getTime().after(s.getTerm().getAddDeadline())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add deadline for this section has passed.");
         }
 
-        // Student Already Enrolled Check
         Enrollment alreadyEnrolledCheck = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(sectionNo, studentId);
         if (alreadyEnrolledCheck != null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student is already enrolled in section " + sectionNo);
@@ -147,7 +144,7 @@ public class StudentController {
             enrollment.getGrade(),
             enrollment.getUser().getId(),
             enrollment.getUser().getName(),
-            enrollment.getSection().getCourse().getTitle(), // added title
+            enrollment.getSection().getCourse().getTitle(),
             enrollment.getUser().getEmail(),
             enrollment.getSection().getCourse().getCourseId(),
             enrollment.getSection().getSecId(),
@@ -162,20 +159,16 @@ public class StudentController {
 
     }
 
-    // student drops a course
-    // user must be student
+    // student drops a course. User MUST be student.
    @DeleteMapping("/enrollments/{enrollmentId}")
    public void dropCourse(@PathVariable("enrollmentId") int enrollmentId) {
 
-       // Check to make sure enrollment exists
        if (enrollmentRepository.findById(enrollmentId).isEmpty()) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment does not exist.");
        }
 
-       // Gets studentId from the enrollment, Currently being used for student check
-       int studentId = enrollmentRepository.findById(enrollmentId).get().getUser().getId();
-
        // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       int studentId = enrollmentRepository.findById(enrollmentId).get().getUser().getId();
        if (!isStudent(studentId)) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
        }
@@ -183,13 +176,12 @@ public class StudentController {
        Calendar today = Calendar.getInstance();
        Enrollment currentEnrollment = enrollmentRepository.findById(enrollmentId).get();
 
-       // Check that today is not after the dropDeadline for section
        if (today.getTime().after(currentEnrollment.getSection().getTerm().getDropDeadline())) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Current date is beyond the drop deadline.");
        }
 
        // Drops student from course
-        enrollmentRepository.delete(currentEnrollment);
+       enrollmentRepository.delete(currentEnrollment);
 
    }
 
