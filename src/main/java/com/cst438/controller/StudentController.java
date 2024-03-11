@@ -61,27 +61,26 @@ public class StudentController {
            @RequestParam("semester") String semester,
            @RequestParam("studentId") int studentId) {
 
-     List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
-     List<EnrollmentDTO> enrollmentList = new ArrayList<>();
+       List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
+       List<EnrollmentDTO> enrollmentList = new ArrayList<>();
+       enrollments.forEach(e -> enrollmentList.add(new EnrollmentDTO(
+           e.getEnrollmentId(),
+           e.getGrade(),
+           e.getUser().getId(),
+           e.getUser().getName(),
+           e.getUser().getEmail(),
+           e.getSection().getCourse().getCourseId(),
+           e.getSection().getSecId(),
+           e.getSection().getSectionNo(),
+           e.getSection().getBuilding(),
+           e.getSection().getRoom(),
+           e.getSection().getTimes(),
+           e.getSection().getCourse().getCredits(),
+           e.getSection().getTerm().getYear(),
+           e.getSection().getTerm().getSemester()
+       )));
 
-     enrollments.forEach(e -> enrollmentList.add(new EnrollmentDTO(
-         e.getEnrollmentId(),
-         e.getGrade(),
-         e.getUser().getId(),
-         e.getUser().getName(),
-         e.getUser().getEmail(),
-         e.getSection().getCourse().getCourseId(),
-         e.getSection().getSecId(),
-         e.getSection().getSectionNo(),
-         e.getSection().getBuilding(),
-         e.getSection().getRoom(),
-         e.getSection().getTimes(),
-         e.getSection().getCourse().getCredits(),
-         e.getSection().getTerm().getYear(),
-         e.getSection().getTerm().getSemester()
-     )));
-
-     return enrollmentList;
+       return enrollmentList;
    }
 
 
@@ -100,6 +99,8 @@ public class StudentController {
         // check that student is not already enrolled into this section
         // create a new enrollment entity and save.  The enrollment grade will
         // be NULL until instructor enters final grades for the course.
+
+
 
         // remove the following line when done.
         return null;
