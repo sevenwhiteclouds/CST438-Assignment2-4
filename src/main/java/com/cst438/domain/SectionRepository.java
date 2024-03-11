@@ -6,7 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface SectionRepository extends CrudRepository<Section, Integer> {
-	
     @Query("select s from Section s where s.course.courseId like :courseId and s.term.year=:year and s.term.semester=:semester order by s.course.courseId, s.secId asc")
     List<Section> findByLikeCourseIdAndYearAndSemester(String courseId, int year, String semester);
 

@@ -29,11 +29,11 @@ public class Section {
 
     // TODO  uncomment the following lines
 
-//    @OneToMany(mappedBy="section")
-//    List<Enrollment> enrollments;
+    //@OneToMany(mappedBy="section_no")
+    //List<Enrollment> enrollments;
 
-//    @OneToMany(mappedBy="section")
-//    List<Assignment> assignments;
+    @OneToMany(mappedBy="assignmentId")
+    List<Assignment> assignments;
 
     public int getSectionNo() {
         return sectionNo;

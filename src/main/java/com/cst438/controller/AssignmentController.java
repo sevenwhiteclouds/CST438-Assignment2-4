@@ -4,6 +4,7 @@ import com.cst438.domain.*;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.AssignmentStudentDTO;
 import com.cst438.dto.GradeDTO;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,31 +14,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class AssignmentController {
-
+    @Autowired
+    SectionRepository SectionRepo;
     @Autowired
     AssignmentRepository assignmentRepository;
-
 
     // instructor lists assignments for a section.  Assignments ordered by due date.
     // logged in user must be the instructor for the section
     @GetMapping("/sections/{secNo}/assignments")
-    public List<AssignmentDTO> getAssignments(
-            @PathVariable("secNo") int secNo) {
+    public List<AssignmentDTO> getAssignments(@PathVariable("secNo") int secNo) {
+        Section sec = SectionRepo.findById(secNo).orElse(null);
 
-        // TODO remove the following line when done
-		
-		// hint: use the assignment repository method 
-		//  findBySectionNoOrderByDueDate to return 
-		//  a list of assignments
+        if (sec == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("section %d not found ", secNo));
+        }
 
-        return null;
+        List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
+        List<AssignmentDTO> assignmentsDTO = new ArrayList<>();
+
+        assignments.forEach(ass -> assignmentsDTO.add(new AssignmentDTO(
+            ass.getAssignmentId(),
+            ass.getTitle(),
+            ass.getDueDate().toString(),
+            sec.getCourse().getCourseId(),
+            sec.getSecId(),
+            sec.getSectionNo()
+        )));
+
+        return assignmentsDTO;
     }
 
     // add assignment

@@ -13,7 +13,7 @@ public class Assignment {
 
     @ManyToOne
     @JoinColumn(name = "section_no", nullable = false)
-    private Section sectionNumber;
+    private Section section;
 
     private String title;
     private Date dueDate;
@@ -26,12 +26,12 @@ public class Assignment {
         this.assignmentId = assignmentId;
     }
 
-    public Section getSectionNumber() {
-        return sectionNumber;
+    public Section getSection() {
+        return section;
     }
 
-    public void setSectionNumber(Section sectionNumber) {
-        this.sectionNumber = sectionNumber;
+    public void setSection(Section sectionNumber) {
+        this.section = sectionNumber;
     }
 
     public String getTitle() {
