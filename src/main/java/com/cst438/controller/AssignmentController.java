@@ -156,6 +156,8 @@ public class AssignmentController {
                 g.setScore(null);
                 g.setAssignment(assignmentRepository.findById(assignmentId).orElse(null));
                 g.setEnrollment(e);
+                grade_list.add(new GradeDTO(g.getGradeId(), e.getUser().getName(), e.getUser().getEmail(), a.getTitle(),
+                        a.getSection().getCourse().getCourseId(), assignmentSectionId, g.getScore()));
             }
         }
 
