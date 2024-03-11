@@ -133,7 +133,7 @@ public class AssignmentController {
             }
             else {
                 Grade g = new Grade();
-                g.setScore(0); // Ask Prof how this can be set to null if score is type int
+                g.setScore(null);
                 g.setAssignment(assignmentRepository.findById(assignmentId).orElse(null));
                 g.setEnrollment(e);
             }
