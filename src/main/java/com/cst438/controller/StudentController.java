@@ -20,6 +20,9 @@ public class StudentController {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    SectionRepository sectionRepository;
+
    // student gets transcript showing list of all enrollments
    // studentId will be temporary until Login security is implemented
    //example URL  /transcript?studentId=19803
@@ -97,18 +100,58 @@ public class StudentController {
 		    @PathVariable int sectionNo,
             @RequestParam("studentId") int studentId ) {
 
-        // TODO
+        // SectionNo check
+        if (sectionRepository.findById(sectionNo).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This section does not exist.");
+        }
 
-        // check that the Section entity with primary key sectionNo exists
-        // check that today is between addDate and addDeadline for the section
-        // check that student is not already enrolled into this section
-        // create a new enrollment entity and save.  The enrollment grade will
-        // be NULL until instructor enters final grades for the course.
+        // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+        if (userRepository.findById(studentId).isEmpty() || !Objects.equals(userRepository.findById(studentId).get().getType(), "STUDENT")) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+        }
 
+        Section s = sectionRepository.findById(sectionNo).get();
+        User user = userRepository.findById(studentId).get();
+        Enrollment enrollment = new Enrollment();
 
+        Calendar today = Calendar.getInstance();
 
-        // remove the following line when done.
-        return null;
+        // Date Check. Checks to make sure the current date is between both the add date and add deadline.
+        if (today.getTime().before(s.getTerm().getAddDate())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add date for this section hasn't started yet.");
+        } else if (today.getTime().after(s.getTerm().getAddDeadline())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add deadline for this section has passed.");
+        }
+
+        // Student Already Enrolled Check
+        Enrollment alreadyEnrolledCheck = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(sectionNo, studentId);
+        if (alreadyEnrolledCheck != null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student is already enrolled in section " + sectionNo);
+        }
+
+        // Create new enrollment entity + save. Grade == NULL
+        enrollment.setSection(s);
+        enrollment.setGrade("NULL");
+        enrollment.setUser(user);
+
+        enrollment = enrollmentRepository.save(enrollment);
+
+        return new EnrollmentDTO(
+            enrollment.getEnrollmentId(),
+            enrollment.getGrade(),
+            enrollment.getUser().getId(),
+            enrollment.getUser().getName(),
+            enrollment.getUser().getEmail(),
+            enrollment.getSection().getCourse().getCourseId(),
+            enrollment.getSection().getSecId(),
+            enrollment.getSection().getSectionNo(),
+            enrollment.getSection().getBuilding(),
+            enrollment.getSection().getRoom(),
+            enrollment.getSection().getTimes(),
+            enrollment.getSection().getCourse().getCredits(),
+            enrollment.getSection().getTerm().getYear(),
+            enrollment.getSection().getTerm().getSemester()
+        );
 
     }
 
