@@ -56,8 +56,8 @@ public class StudentController {
                    null,
                    null,
                    e.getSection().getCourse().getCredits(),
-                   0,
-                   null));
+                   e.getSection().getTerm().getYear(),
+                   e.getSection().getTerm().getSemester()));
        }
         return dto_list;
    }
