@@ -33,6 +33,8 @@ public class StudentController {
        // user must be a student
        // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
        // irrelevant fields set to null to only return course_id, sec_id, title, credit, and grade
+
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
        if (!isStudent(studentId)) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
        }

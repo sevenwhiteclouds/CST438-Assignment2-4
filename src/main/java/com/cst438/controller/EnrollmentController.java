@@ -54,7 +54,7 @@ public class EnrollmentController {
     @PutMapping("/enrollments")
     public void updateEnrollmentGrade(@RequestBody List<EnrollmentDTO> dlist) {
 
-        // TODO
+        // TODO add instructor check once login is implemented
 
         // For each EnrollmentDTO in the list
         //  find the Enrollment entity using enrollmentId
