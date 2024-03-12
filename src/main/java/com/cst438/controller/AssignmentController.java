@@ -69,6 +69,8 @@ public class AssignmentController {
 
         Section sec = sectionRepository.findById(dto.secNo()).orElse(null);
 
+        // check incoming client dto for correct
+        // title length, section id, due date within limits, etc
         if (sec == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (sec.getSecId() != dto.secId()) {
@@ -112,6 +114,8 @@ public class AssignmentController {
 
         Assignment assignment = assignmentRepository.findById(dto.id()).orElse(null);
 
+        // check incoming client dto for correct
+        // title length, section id, due date within limits, etc
         if (assignment == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
