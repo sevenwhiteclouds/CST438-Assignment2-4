@@ -39,11 +39,6 @@ public class StudentController {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
        }
 
-       User user = userRepository.findById(studentId).orElse(null);
-       if (user == null) {
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student Id does not exist.");
-       }
-
        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId);
        List<EnrollmentDTO> dto_list = new ArrayList<>();
        for(Enrollment e : enrollments) {
