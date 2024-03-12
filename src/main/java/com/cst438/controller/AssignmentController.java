@@ -102,26 +102,40 @@ public class AssignmentController {
     // return updated AssignmentDTO
     @PutMapping("/assignments")
     public AssignmentDTO updateAssignment(@RequestBody AssignmentDTO dto) {
-        // this whole method probably needs some tweaking. currently, only the assignment id
-        // needs to match to update the record. ideally,
-        // all aspects of the incoming dto must match, for security purposes
+        Date dueDate = null;
+        try {
+            dueDate = Date.valueOf(dto.dueDate());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
         Assignment assignment = assignmentRepository.findById(dto.id()).orElse(null);
 
         if (assignment == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "assignment not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (dueDate.toLocalDate().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (!assignment.getSection().getCourse().getCourseId().equals(dto.courseId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (assignment.getSection().getSecId() != dto.secId()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (assignment.getSection().getSectionNo() != dto.secNo()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
         assignment.setTitle(dto.title());
-        assignment.setDueDate(Date.valueOf(dto.dueDate()));
+        assignment.setDueDate(dueDate);
         assignment = assignmentRepository.save(assignment);
 
         return new AssignmentDTO(
             assignment.getAssignmentId(),
             assignment.getTitle(),
             assignment.getDueDate().toString(),
-            dto.courseId(),
-            dto.secId(),
-            dto.secNo()
+            assignment.getSection().getCourse().getCourseId(),
+            assignment.getSection().getSecId(),
+            assignment.getSection().getSectionNo()
         );
     }
 
