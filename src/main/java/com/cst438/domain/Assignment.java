@@ -2,7 +2,6 @@ package com.cst438.domain;
 
 import jakarta.persistence.*;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 
 @Entity
 public class Assignment {
