@@ -78,6 +78,8 @@ public class AssignmentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (dueDate.toLocalDate().isBefore(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } else if (!sec.getCourse().getCourseId().equals(dto.courseId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
         Assignment assignment = new Assignment();
