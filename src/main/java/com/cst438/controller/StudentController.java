@@ -23,6 +23,7 @@ public class StudentController {
     @Autowired
     SectionRepository sectionRepository;
 
+
    // student gets transcript showing list of all enrollments
    // studentId will be temporary until Login security is implemented
    //example URL  /transcript?studentId=19803
@@ -77,6 +78,12 @@ public class StudentController {
        }
 
        List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
+
+       // Checks for invalid year/date
+       if (enrollments.isEmpty()) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No schedule found for query");
+       }
+
        List<EnrollmentDTO> enrollmentDTOList = new ArrayList<>();
        enrollments.forEach(e -> enrollmentDTOList.add(new EnrollmentDTO(
            e.getEnrollmentId(),
