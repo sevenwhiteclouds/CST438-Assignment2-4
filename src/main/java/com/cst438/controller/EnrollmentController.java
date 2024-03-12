@@ -3,6 +3,8 @@ package com.cst438.controller;
 
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
+import com.cst438.domain.Section;
+import com.cst438.domain.SectionRepository;
 import com.cst438.dto.EnrollmentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,9 +23,18 @@ public class EnrollmentController {
     @Autowired
     EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    SectionRepository sectionRepository;
+
     @GetMapping("/sections/{sectionNo}/enrollments")
     public List<EnrollmentDTO> getEnrollments(
             @PathVariable("sectionNo") int sectionNo ) {
+
+        Section section = sectionRepository.findById(sectionNo).orElse(null);
+
+        if (section == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "section not found");
+        }
 
 		//  hint: use enrollment repository findEnrollmentsBySectionNoOrderByStudentName method
         List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(sectionNo);
