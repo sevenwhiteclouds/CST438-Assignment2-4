@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -76,7 +75,7 @@ public class AssignmentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        } else if (dueDate.toLocalDate().isBefore(LocalDate.now())) {
+        } else if (!sec.getTerm().getStartDate().before(dueDate) || !sec.getTerm().getEndDate().after(dueDate)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (!sec.getCourse().getCourseId().equals(dto.courseId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -117,7 +116,8 @@ public class AssignmentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        } else if (dueDate.toLocalDate().isBefore(LocalDate.now())) {
+        } else if (!assignment.getSection().getTerm().getStartDate().before(dueDate) ||
+            !assignment.getSection().getTerm().getEndDate().after(dueDate)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         } else if (!assignment.getSection().getCourse().getCourseId().equals(dto.courseId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
