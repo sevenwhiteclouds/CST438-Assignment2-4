@@ -116,8 +116,8 @@ public class AssignmentController {
     @DeleteMapping("/assignments/{assignmentId}")
     public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
 
-        // TODO
-        // MB: Not sure if we can check logged in user's type = INSTRUCTOR at this time?
+        // TODO for later - add logged in user check
+
         Assignment a = assignmentRepository.findById(assignmentId).orElse(null);
         // do nothing if assignment does not exist
         if (a!=null) {
@@ -133,7 +133,7 @@ public class AssignmentController {
     @GetMapping("/assignments/{assignmentId}/grades")
     public List<GradeDTO> getAssignmentGrades(@PathVariable("assignmentId") int assignmentId) {
 
-        // TODO remove the following line when done
+        // TODO for later - add logged in user check
 
         // get the list of enrollments for the section related to this assignment.
 		// hint: use te enrollment repository method findEnrollmentsBySectionOrderByStudentName.
@@ -175,7 +175,7 @@ public class AssignmentController {
     @PutMapping("/grades")
     public void updateGrades(@RequestBody List<GradeDTO> dlist) {
 
-        // TODO
+        // TODO for later - add logged in user check
 
         // for each grade in the GradeDTO list, retrieve the grade entity
         // update the score and save the entity
@@ -200,7 +200,7 @@ public class AssignmentController {
             @RequestParam("year") int year,
             @RequestParam("semester") String semester) {
 
-        // TODO remove the following line when done
+        // TODO for later - add logged in user check
 
         // return a list of assignments and (if they exist) the assignment grade
         //  for all sections that the student is enrolled for the given year and semester
