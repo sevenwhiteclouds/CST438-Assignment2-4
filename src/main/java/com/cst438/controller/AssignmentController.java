@@ -217,13 +217,11 @@ public class AssignmentController {
         }
 
         List<AssignmentStudentDTO> assignment_grade_list = new ArrayList<>();
-        for (Enrollment e : enrollments) {
-            for (Assignment a : assignments) {
-                Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
-                if (grade != null) {
-                    assignment_grade_list.add(new AssignmentStudentDTO(a.getAssignmentId(), a.getTitle(), a.getDueDate(),
-                            a.getSection().getCourse().getCourseId(), a.getSection().getSecId(), grade.getScore()));
-                }
+        for (Assignment a : assignments) {
+            if (gradeRepository.findById(a.getAssignmentId()).isPresent()){
+                Integer grade = gradeRepository.findById(a.getAssignmentId()).get().getScore();
+                assignment_grade_list.add(new AssignmentStudentDTO(a.getAssignmentId(), a.getTitle(), a.getDueDate(),
+                    a.getSection().getCourse().getCourseId(), a.getSection().getSecId(), grade));
             }
         }
 
