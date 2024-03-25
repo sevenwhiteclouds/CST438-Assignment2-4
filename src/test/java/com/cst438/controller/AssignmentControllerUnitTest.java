@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static com.cst438.test.utils.TestUtils.fromJsonString;
+import static com.cst438.test.utils.TestUtils.asJsonString;
 
 import java.util.List;
 
@@ -18,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @SpringBootTest
 public class AssignmentControllerUnitTest {
-
     @Autowired
     MockMvc mvc;
 
@@ -77,22 +78,5 @@ public class AssignmentControllerUnitTest {
 
         // check the response code for 200 meaning OK
         assertEquals(200, responsePut.getStatus());
-    }
-
-
-    private static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static <T> T  fromJsonString(String str, Class<T> valueType ) {
-        try {
-            return new ObjectMapper().readValue(str, valueType);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }
