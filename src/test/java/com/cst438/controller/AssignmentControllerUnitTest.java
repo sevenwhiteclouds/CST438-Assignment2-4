@@ -92,8 +92,16 @@ public class AssignmentControllerUnitTest {
             .andReturn()
             .getResponse();
 
+        AssignmentDTO returned = fromJsonString(res.getContentAsString(), AssignmentDTO.class);
+
         // doesn't require a message assert because it returns a dto if successful
         assertEquals(200, res.getStatus());
+        assertNotEquals(test.id(), returned.id());
+        assertEquals(test.title(), returned.title());
+        assertEquals(test.dueDate(), returned.dueDate());
+        assertEquals(test.courseId(), returned.courseId());
+        assertEquals(test.secId(), returned.secId());
+        assertEquals(test.secNo(), returned.secNo());
     }
 
     @Test
