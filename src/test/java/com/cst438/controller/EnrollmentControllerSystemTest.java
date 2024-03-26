@@ -48,6 +48,9 @@ public class EnrollmentControllerSystemTest {
         driver.findElement(By.id("viewEnrollments")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
+        // get original grade
+        String og = driver.findElement(By.id("grade")).getAttribute("value");
+
         // enters "A" in Grade text box and clicks "UPDATE"
         driver.findElement(By.id("grade")).clear();
         driver.findElement(By.id("grade")).sendKeys("A");
@@ -56,6 +59,18 @@ public class EnrollmentControllerSystemTest {
         // confirms message says "Enrollment saved"
         String message = driver.findElement(By.id("e_message")).getText();
         assertTrue(message.startsWith("Enrollment saved"));
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        // return Grade back to original grade
+        driver.findElement(By.id("grade")).clear();
+        driver.findElement(By.id("grade")).sendKeys(og);
+        driver.findElement(By.id("update")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        // confirms message says "Enrollment saved"
+        String msg = driver.findElement(By.id("e_message")).getText();
+        assertTrue(msg.startsWith("Enrollment saved"));
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
     }
 
