@@ -64,7 +64,7 @@ public class AssignmentController {
         try {
             dueDate = Date.valueOf(dto.dueDate());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad date");
         }
 
         Section sec = sectionRepository.findById(dto.secNo()).orElse(null);
@@ -72,15 +72,15 @@ public class AssignmentController {
         // check incoming client dto for correct
         // title length, section id, due date within limits, etc
         if (sec == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad section number");
         } else if (sec.getSecId() != dto.secId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad section ID");
         } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad title");
         } else if (!sec.getTerm().getStartDate().before(dueDate) || !sec.getTerm().getEndDate().after(dueDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad date");
         } else if (!sec.getCourse().getCourseId().equals(dto.courseId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad course ID");
         }
 
         Assignment assignment = new Assignment();

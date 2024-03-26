@@ -92,9 +92,8 @@ public class AssignmentControllerUnitTest {
             .andReturn()
             .getResponse();
 
+        // doesn't require a message assert because it returns a dto if successful
         assertEquals(200, res.getStatus());
-
-        // TODO: update backend to get correct response message and assert it
     }
 
     @Test
@@ -110,8 +109,7 @@ public class AssignmentControllerUnitTest {
             .getResponse();
 
         assertEquals(400, res.getStatus());
-
-        // TODO: update backend to get correct response message and assert it
+        assertEquals("Bad date", res.getErrorMessage());
     }
 
     @Test
@@ -127,7 +125,6 @@ public class AssignmentControllerUnitTest {
             .getResponse();
 
         assertEquals(400, res.getStatus());
-
-        // TODO: update backend to get correct response message and assert it
+        assertEquals("Bad section number", res.getErrorMessage());
     }
 }
