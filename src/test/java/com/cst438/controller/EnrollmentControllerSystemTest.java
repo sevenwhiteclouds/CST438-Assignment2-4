@@ -41,11 +41,11 @@ public class EnrollmentControllerSystemTest {
         // Enter 2024 Spring and then click "Show Sections" on Instructor home page
         driver.findElement(By.id("year")).sendKeys("2024");
         driver.findElement(By.id("semester")).sendKeys("Spring");
-        driver.findElement(By.id("sections")).click();
+        driver.findElement(By.id("showSections")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
         // clicks "View Enrollments"
-        driver.findElement(By.id("enrollments")).click();
+        driver.findElement(By.id("viewEnrollments")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
         // enters "A" in Grade text box and clicks "UPDATE"
