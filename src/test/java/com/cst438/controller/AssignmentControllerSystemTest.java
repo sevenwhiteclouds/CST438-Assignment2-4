@@ -21,8 +21,7 @@ public class AssignmentControllerSystemTest {
     public void setUpDriver() throws Exception {
 
         // set properties required by Chrome Driver
-        System.setProperty(
-                "webdriver.chrome.driver", Constants.CHROME_DRIVER_FILE_LOCATION.getValue());
+        System.setProperty("webdriver.chrome.driver", Constants.CHROME_DRIVER_FILE_LOCATION.getValue());
         ChromeOptions ops = new ChromeOptions();
         ops.addArguments("--remote-allow-origins=*");
 
@@ -42,6 +41,61 @@ public class AssignmentControllerSystemTest {
             driver.quit();
             driver = null;
         }
+    }
+
+    @Test
+    public void systemAddAssignment() throws Exception {
+        // test adding an assignment when there is already assignments present
+        driver.findElement(By.id("year")).sendKeys("2024");
+        driver.findElement(By.id("semester")).sendKeys("Spring");
+        driver.findElement(By.id("showSections")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        driver.findElement(By.id("viewAssignments")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        driver.findElement(By.id("addNewAssignmentButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        driver.findElement(By.name("title")).sendKeys("yessir");
+        driver.findElement(By.id("datePickerField")).findElement(By.tagName("input")).click();
+        driver.switchTo().activeElement().sendKeys("03152024");
+        driver.findElement(By.id("saveButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        assertEquals("Assignment added", driver.findElement(By.tagName("h4")).getText());
+
+        List<WebElement> list = driver.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+        WebElement element = list.get(list.size() - 1);
+        element.findElement(By.id("deleteButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        driver.findElement(By.className("react-confirm-alert-button-group")).findElement(By.tagName("button")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        assertEquals("Assignment deleted", driver.findElement(By.tagName("h4")).getText());
+
+        // test adding an assignment when there is no assignments present
+        driver.navigate().back();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        list = driver.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+        element = list.get(list.size() - 2);
+        element.findElement(By.id("viewAssignments")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        driver.findElement(By.id("addNewAssignmentButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        driver.findElement(By.name("title")).sendKeys("yessir2");
+        driver.findElement(By.id("datePickerField")).findElement(By.tagName("input")).click();
+        driver.switchTo().activeElement().sendKeys("03172024");
+        driver.findElement(By.id("saveButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        assertEquals("Assignment added", driver.findElement(By.tagName("h4")).getText());
+
+        driver.findElement(By.id("deleteButton")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        driver.findElement(By.className("react-confirm-alert-button-group")).findElement(By.tagName("button")).click();
+        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        assertEquals("Assignment deleted", driver.findElement(By.tagName("h4")).getText());
     }
 
     // System test to grade an assignment
