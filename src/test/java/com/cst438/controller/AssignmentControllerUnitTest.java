@@ -98,9 +98,26 @@ public class AssignmentControllerUnitTest {
     }
 
     @Test
+    public void newAssignmentPastEndDate() throws Exception {
+        // end date is 2024-05-17
+        AssignmentDTO test = new AssignmentDTO(0, "yessir2", "2024-05-18", "cst363", 1, 8);
+
+        MockHttpServletResponse res = mvc.perform(MockMvcRequestBuilders.post("/assignments")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(test)))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(400, res.getStatus());
+
+        // TODO: update backend to get correct response message and assert it
+    }
+
+    @Test
     public void newAssignmentInvalidSecNo() throws Exception {
         // section number should be 8 and not 911
-        AssignmentDTO test = new AssignmentDTO(0, "yessir2", "2024-03-15", "cst363", 1, 911);
+        AssignmentDTO test = new AssignmentDTO(0, "yessir3", "2024-03-15", "cst363", 1, 911);
 
         MockHttpServletResponse res = mvc.perform(MockMvcRequestBuilders.post("/assignments")
             .accept(MediaType.APPLICATION_JSON)
