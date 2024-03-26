@@ -1,30 +1,22 @@
 package com.cst438.controller;
 
-import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
-import com.cst438.domain.Section;
 import com.cst438.domain.SectionRepository;
-import com.cst438.dto.EnrollmentDTO;
 import com.cst438.test.utils.Constants;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.openqa.selenium.*;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.List;
-
-import static com.cst438.test.utils.TestUtils.fromJsonString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -55,7 +47,7 @@ class StudentControllerSystemTests {
     }
 
     @AfterEach
-    public void terminateDriver() throws Exception {
+    public void terminateDriver() {
         if (driver != null) {
             driver.close();
             driver.quit();
@@ -66,7 +58,6 @@ class StudentControllerSystemTests {
     @Test // student enrolls into a section TODO: Reset Test at End
     void studentEnrollment() throws Exception {
         final int desiredSection = 11;
-        MockHttpServletResponse response;
 
         driver.findElement(By.id("addCourse")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
