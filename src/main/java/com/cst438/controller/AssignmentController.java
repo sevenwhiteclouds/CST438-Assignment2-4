@@ -109,7 +109,7 @@ public class AssignmentController {
         try {
             dueDate = Date.valueOf(dto.dueDate());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad date");
         }
 
         Assignment assignment = assignmentRepository.findById(dto.id()).orElse(null);
@@ -117,18 +117,18 @@ public class AssignmentController {
         // check incoming client dto for correct
         // title length, section id, due date within limits, etc
         if (assignment == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad assignment ID");
         } else if (dto.title().length() > 45 || dto.title().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad title");
         } else if (!assignment.getSection().getTerm().getStartDate().before(dueDate) ||
             !assignment.getSection().getTerm().getEndDate().after(dueDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad date");
         } else if (!assignment.getSection().getCourse().getCourseId().equals(dto.courseId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad course ID");
         } else if (assignment.getSection().getSecId() != dto.secId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad section ID");
         } else if (assignment.getSection().getSectionNo() != dto.secNo()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad section number");
         }
 
         assignment.setTitle(dto.title().trim());
