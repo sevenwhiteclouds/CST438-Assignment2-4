@@ -8,6 +8,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import com.cst438.test.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,41 +66,101 @@ public class AssignmentControllerSystemTest {
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
         // For the first Grade record in the table, save the current score in a variable
-        WebElement inputScore = driver.findElement(By.id("scoreInput"));
-        String currentScore = inputScore.getAttribute("value");
+//        WebElement inputScore = driver.findElement(By.id("scoreInput"));
+//        String currentScore = inputScore.getAttribute("value");
 
-        // Delete the score that is currently there
-        inputScore.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+        WebElement table = driver.findElement(By.xpath("//tbody"));
+        List<WebElement> rows = table.findElements(By.tagName("tr"));
 
-        // Update the existing score to something other than what is currently there
-        driver.findElement(By.id("scoreInput")).sendKeys("30");
-        // Click "Update" for the first Grade record
-        driver.findElement(By.id("updateButton")).click();
-        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        List<String> currentScore = new ArrayList<>();
+        for (WebElement row : rows) {
+            WebElement inputScore = row.findElement(By.id("scoreInput"));
+            currentScore.add(inputScore.getAttribute("value"));
+            //String currentScore = inputScore.getAttribute("value");
+            // Delete the score that is currently there
+            inputScore.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+            // Update the existing score to something other than what is currently there
+            row.findElement(By.id("scoreInput")).sendKeys("30");
+            // Click "Update" for the first Grade record
+            row.findElement(By.id("updateButton")).click();
+            Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+            // Assert message indicates new score was saved
+            String message = driver.findElement(By.id("addMessage")).getText();
+            assertTrue(message.startsWith("Grade saved"));
+            // Click "Back" to go back to list of Assignments
+            //driver.findElement(By.id("backButton")).click();
+            //Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+            // Click "Show Grades" again for first row (assignment) of table
+            //driver.findElement(By.id("showGrades")).click();
+            //Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+            // Confirm score saved as the new input above
+            // For the first Grade record in the table, it should show the new score that was entered
+            //WebElement inputNewScore = row.findElement(By.id("scoreInput"));
+            //String newScore = inputNewScore.getAttribute("value");
+            //assertEquals("30", newScore);
+            // Set score back to what it was before
+//            WebElement inputScore2 = row.findElement(By.id("scoreInput"));
+//            inputScore2.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+//            row.findElement(By.id("scoreInput")).sendKeys(currentScore);
+//            row.findElement(By.id("updateButton")).click();
+//            Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+        }
 
-        // Assert message indicates new score was saved
-        String message = driver.findElement(By.id("addMessage")).getText();
-        assertTrue(message.startsWith("Grade saved"));
-
-        // Click "Back" to go back to list of Assignments
+         //Click "Back" to go back to list of Assignments
         driver.findElement(By.id("backButton")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
-
-        // Click "Show Grades" again for first row (assignment) of table
+         //Click "Show Grades" again for first row (assignment) of table
         driver.findElement(By.id("showGrades")).click();
         Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
 
-        // Confirm score saved as the new input above
-        // For the first Grade record in the table, it should show the new score that was entered
-        WebElement inputNewScore = driver.findElement(By.id("scoreInput"));
-        String newScore = inputNewScore.getAttribute("value");
-        assertEquals("30", newScore);
+        WebElement table2 = driver.findElement(By.xpath("//tbody"));
+        List<WebElement> rows2 = table2.findElements(By.tagName("tr"));
+
+        int i = 0;
+        for (WebElement row: rows2) {
+            WebElement inputNewScore = row.findElement(By.id("scoreInput"));
+            assertEquals("30", inputNewScore.getAttribute("value"));
+            // Set score back to what it was before
+            //WebElement inputScore2 = row.findElement(By.id("scoreInput"));
+            inputNewScore.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+            row.findElement(By.id("scoreInput")).sendKeys(currentScore.get(i));
+            row.findElement(By.id("updateButton")).click();
+            Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+            i++;
+        }
+
+//        // Delete the score that is currently there
+//        inputScore.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+
+//        // Update the existing score to something other than what is currently there
+////        driver.findElement(By.id("scoreInput")).sendKeys("30");
+////        // Click "Update" for the first Grade record
+////        driver.findElement(By.id("updateButton")).click();
+////        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+//        // Assert message indicates new score was saved
+//        String message = driver.findElement(By.id("addMessage")).getText();
+//        assertTrue(message.startsWith("Grade saved"));
+
+        // Click "Back" to go back to list of Assignments
+//        driver.findElement(By.id("backButton")).click();
+//        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+        // Click "Show Grades" again for first row (assignment) of table
+//        driver.findElement(By.id("showGrades")).click();
+//        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+
+//        // Confirm score saved as the new input above
+//        // For the first Grade record in the table, it should show the new score that was entered
+//        WebElement inputNewScore = driver.findElement(By.id("scoreInput"));
+//        String newScore = inputNewScore.getAttribute("value");
+//        assertEquals("30", newScore);
 
         // Set score back to what it was before
-        WebElement inputScore2 = driver.findElement(By.id("scoreInput"));
-        inputScore2.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
-        driver.findElement(By.id("scoreInput")).sendKeys(currentScore);
-        driver.findElement(By.id("updateButton")).click();
-        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
+//        WebElement inputScore2 = driver.findElement(By.id("scoreInput"));
+//        inputScore2.sendKeys(Keys.chord(Keys.CONTROL,"a", Keys.DELETE));
+//        driver.findElement(By.id("scoreInput")).sendKeys(currentScore);
+//        driver.findElement(By.id("updateButton")).click();
+//        Thread.sleep(Constants.SLEEP_DURATION.getIntValue());
     }
 }
