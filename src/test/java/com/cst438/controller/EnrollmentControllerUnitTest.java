@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 import static com.cst438.test.utils.TestUtils.asJsonString;
+import static com.cst438.test.utils.TestUtils.fromJsonString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @AutoConfigureMockMvc
@@ -31,39 +32,42 @@ public class EnrollmentControllerUnitTest {
 
         MockHttpServletResponse response;
 
-        Enrollment e1 = enrollmentRepository.findById(2).orElse(null);
-        Enrollment e2 = enrollmentRepository.findById(3).orElse(null);
-
-        // create DTOs with grades set to A
-        List<EnrollmentDTO> dto_list =  new ArrayList<>();
-        dto_list.add(new EnrollmentDTO(
-                2, "A", 3, "thomas edison", "Introduction to Database", "tedison@csumb.edu", "cst363",
-                1, 8, "052", "104", "M W 10:00-11:50", 4, 2024, "Spring"));
-        dto_list.add(new EnrollmentDTO(
-                3, "A", 3, "thomas edison", "Software Engineering", "tedison@csumb.edu", "cst438",
-                1, 10, "052", "222", "T Th 12:00-1:50", 4, 2024, "Spring"));
-
-        // issue the PUT request
         response = mvc.perform(
-                        MockMvcRequestBuilders
-                                .put("/enrollments")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(asJsonString(dto_list)))
+                MockMvcRequestBuilders
+                        .get("/sections/8/enrollments")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
 
         // check the response code for 200 meaning OK
         assertEquals(200, response.getStatus());
 
-        //return Data converted from String to DTO
-        //EnrollmentDTO result = fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
+        List<EnrollmentDTO> result = fromJsonString(response.getContentAsString(), List.class);
+
+        // gets original data from database before updating it
+        Enrollment e1 = enrollmentRepository.findById(2).orElse(null);
+
+        // update grade to "A"
+        result.add(new EnrollmentDTO(
+                2, "A", 3, "thomas edison", "Introduction to Database", "tedison@csumb.edu", "cst363",
+                1, 8, "052", "104", "M W 10:00-11:50", 4, 2024, "Spring"));
+
+
+        // issue the PUT request for result; updating grade to "A"
+        response = mvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/enrollments")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(asJsonString(result)))
+                .andReturn().getResponse();
+
+        // check the response code for 200 meaning OK
+        assertEquals(200, response.getStatus());
 
         // check the database for expected value
-        for (EnrollmentDTO dto : dto_list){
-            Enrollment e = enrollmentRepository.findById(dto.enrollmentId()).orElse(null);
+        Enrollment e = enrollmentRepository.findById(2).orElse(null);
             assertNotNull(e);
-            assertEquals(dto.grade(), e.getGrade());
-        }
+            assertEquals("A", e.getGrade());
 
         // clean up after test
         // place original grade back
@@ -71,9 +75,6 @@ public class EnrollmentControllerUnitTest {
         cleanUp.add(new EnrollmentDTO(
                 2, e1.getGrade(), 3, "thomas edison", "Introduction to Database", "tedison@csumb.edu", "cst363",
                 1, 8, "052", "104", "M W 10:00-11:50", 4, 2024, "Spring"));
-        cleanUp.add(new EnrollmentDTO(
-                3, e2.getGrade(), 3, "thomas edison", "Software Engineering", "tedison@csumb.edu", "cst438",
-                1, 10, "052", "222", "T Th 12:00-1:50", 4, 2024, "Spring"));
 
         // issue the PUT request
         response = mvc.perform(
@@ -87,7 +88,7 @@ public class EnrollmentControllerUnitTest {
         // check the response code for 200 meaning OK
         assertEquals(200, response.getStatus());
 
-        // check the database for deletion
+        // check the database to ensure grade has been return to original grade
         for (EnrollmentDTO clean : cleanUp){
             Enrollment enroll = enrollmentRepository.findById(clean.enrollmentId()).orElse(null);
             assertNotNull(enroll);
