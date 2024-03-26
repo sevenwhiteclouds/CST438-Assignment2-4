@@ -49,8 +49,7 @@ class StudentControllerUnitTests {
         response = mvc.perform(
                 MockMvcRequestBuilders
                     .post("/enrollments/sections/{secId}?studentId={studentId}", section.getSectionNo(), student.getId())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON))
+                    .accept(MediaType.APPLICATION_JSON))
             .andReturn()
             .getResponse();
 
@@ -74,10 +73,51 @@ class StudentControllerUnitTests {
         assertNull(e);
     }
 
-    // TODO: Complete this unit test
     @Test // student attempts to enroll in a section but fails because the student is already enrolled
     void studentAlreadyEnrolled() throws Exception {
+        User student = userRepository.findById(studentId).orElse(null);
+        Section section = sectionRepository.findById(11).orElse(null);
 
+        assertNotNull(student);
+        assertNotNull(section);
+
+        MockHttpServletResponse response;
+
+        response = mvc.perform(
+                MockMvcRequestBuilders
+                    .post("/enrollments/sections/{secId}?studentId={studentId}", section.getSectionNo(), student.getId())
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(200, response.getStatus());
+        EnrollmentDTO result = fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
+
+        assertNotEquals(0, result.enrollmentId());
+
+        Enrollment e = enrollmentRepository.findById(result.enrollmentId()).orElse(null);
+        assertNotNull(e);
+
+        response = mvc.perform(
+                MockMvcRequestBuilders
+                    .post("/enrollments/sections/{secId}?studentId={studentId}", section.getSectionNo(), student.getId())
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(404, response.getStatus());
+        assertEquals("Student is already enrolled in section " + section.getSectionNo(), response.getErrorMessage());
+
+        response = mvc.perform(
+                MockMvcRequestBuilders
+                    .delete("/enrollments/{eId}", result.enrollmentId()))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(200, response.getStatus());
+
+        e = enrollmentRepository.findById(result.enrollmentId()).orElse(null);
+        assertNull(e);
 
     }
 
@@ -88,8 +128,7 @@ class StudentControllerUnitTests {
         response = mvc.perform(
                 MockMvcRequestBuilders
                     .post("/enrollments/sections/{secId}?studentId={studentId}", -1, studentId)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON))
+                    .accept(MediaType.APPLICATION_JSON))
             .andReturn()
             .getResponse();
 
@@ -99,9 +138,25 @@ class StudentControllerUnitTests {
         assertEquals("This section does not exist.", message);
     }
 
-    // TODO: Complete this unit test
     @Test // student attempts to enroll in a section, but it is past the add deadline
     void studentEnrollmentPastDeadline() throws Exception {
+        User student = userRepository.findById(studentId).orElse(null);
+        Section section = sectionRepository.findById(5).orElse(null);
+
+        assertNotNull(student);
+        assertNotNull(section);
+
+        MockHttpServletResponse response;
+
+        response = mvc.perform(
+                MockMvcRequestBuilders
+                    .post("/enrollments/sections/{secId}?studentId={studentId}", section.getSectionNo(), student.getId())
+                    .accept(MediaType.APPLICATION_JSON))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(404, response.getStatus());
+        assertEquals("The add deadline for this section has passed.", response.getErrorMessage());
 
     }
 
