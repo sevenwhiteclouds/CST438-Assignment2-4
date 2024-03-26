@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 import static com.cst438.test.utils.TestUtils.asJsonString;
-import static com.cst438.test.utils.TestUtils.fromJsonString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @AutoConfigureMockMvc
@@ -32,6 +31,9 @@ public class EnrollmentControllerUnitTest {
 
         MockHttpServletResponse response;
 
+        Enrollment e1 = enrollmentRepository.findById(2).orElse(null);
+        Enrollment e2 = enrollmentRepository.findById(3).orElse(null);
+
         // create DTOs with grades set to A
         List<EnrollmentDTO> dto_list =  new ArrayList<>();
         dto_list.add(new EnrollmentDTO(
@@ -41,14 +43,14 @@ public class EnrollmentControllerUnitTest {
                 3, "A", 3, "thomas edison", "Software Engineering", "tedison@csumb.edu", "cst438",
                 1, 10, "052", "222", "T Th 12:00-1:50", 4, 2024, "Spring"));
 
-                // issue the PUT request
-                response = mvc.perform(
+        // issue the PUT request
+        response = mvc.perform(
                         MockMvcRequestBuilders
                                 .put("/enrollments")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(asJsonString(dto_list)))
-                        .andReturn().getResponse();
+                .andReturn().getResponse();
 
         // check the response code for 200 meaning OK
         assertEquals(200, response.getStatus());
@@ -64,18 +66,32 @@ public class EnrollmentControllerUnitTest {
         }
 
         // clean up after test
+        // place original grade back
+        List<EnrollmentDTO> cleanUp =  new ArrayList<>();
+        cleanUp.add(new EnrollmentDTO(
+                2, e1.getGrade(), 3, "thomas edison", "Introduction to Database", "tedison@csumb.edu", "cst363",
+                1, 8, "052", "104", "M W 10:00-11:50", 4, 2024, "Spring"));
+        cleanUp.add(new EnrollmentDTO(
+                3, e2.getGrade(), 3, "thomas edison", "Software Engineering", "tedison@csumb.edu", "cst438",
+                1, 10, "052", "222", "T Th 12:00-1:50", 4, 2024, "Spring"));
+
+        // issue the PUT request
         response = mvc.perform(
-                MockMvcRequestBuilders
-                        .delete("/enrollments"))
+                        MockMvcRequestBuilders
+                                .put("/enrollments")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(asJsonString(cleanUp)))
                 .andReturn().getResponse();
 
         // check the response code for 200 meaning OK
         assertEquals(200, response.getStatus());
 
         // check the database for deletion
-        for (EnrollmentDTO dto : dto_list){
-            Enrollment e = enrollmentRepository.findById(dto.enrollmentId()).orElse(null);
-            assertNull(e);
+        for (EnrollmentDTO clean : cleanUp){
+            Enrollment enroll = enrollmentRepository.findById(clean.enrollmentId()).orElse(null);
+            assertNotNull(enroll);
+            assertEquals(clean.grade(), enroll.getGrade());
         }
     }
 }
