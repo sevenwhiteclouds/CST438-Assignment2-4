@@ -1,5 +1,6 @@
 package com.cst438.controller;
 
+import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.GradeDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -78,5 +79,22 @@ public class AssignmentControllerUnitTest {
 
         // check the response code for 200 meaning OK
         assertEquals(200, responsePut.getStatus());
+    }
+
+    @Test
+    public void newAssignmentInvalidSecNo() throws Exception {
+        // section number should be 8 and not 911
+        AssignmentDTO test = new AssignmentDTO(0, "yessir", "2024-03-15", "cst363", 1, 911);
+
+        MockHttpServletResponse res = mvc.perform(MockMvcRequestBuilders.post("/assignments")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(test)))
+            .andReturn()
+            .getResponse();
+
+        assertEquals(400, res.getStatus());
+
+        // TODO: update backend to get correct response message and assert it
     }
 }
