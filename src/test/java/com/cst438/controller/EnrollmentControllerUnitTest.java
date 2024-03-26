@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import java.util.ArrayList;
+import java.util.List;
 import static com.cst438.test.utils.TestUtils.asJsonString;
 import static com.cst438.test.utils.TestUtils.fromJsonString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,36 +32,50 @@ public class EnrollmentControllerUnitTest {
 
         MockHttpServletResponse response;
 
-        EnrollmentDTO enrollment = new EnrollmentDTO(
-                1,
-                "A",
-                3,
-                "thomas edison",
-                "Introduction to Database",
-                "tedison@csumb.edu",
-                "363",
-                1,
-                1,
-                "052",
-                "100",
-                "M W 10:00-11:50",
-                4,
-                2023,
-                "Fall");
+        // create DTOs with grades set to A
+        List<EnrollmentDTO> dto_list =  new ArrayList<>();
+        dto_list.add(new EnrollmentDTO(
+                2, "A", 3, "thomas edison", "Introduction to Database", "tedison@csumb.edu", "cst363",
+                1, 8, "052", "104", "M W 10:00-11:50", 4, 2024, "Spring"));
+        dto_list.add(new EnrollmentDTO(
+                3, "A", 3, "thomas edison", "Software Engineering", "tedison@csumb.edu", "cst438",
+                1, 10, "052", "222", "T Th 12:00-1:50", 4, 2024, "Spring"));
 
+                // issue the PUT request
                 response = mvc.perform(
                         MockMvcRequestBuilders
                                 .put("/enrollments")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(asJsonString(enrollment)))
+                                .content(asJsonString(dto_list)))
                         .andReturn().getResponse();
 
+        // check the response code for 200 meaning OK
         assertEquals(200, response.getStatus());
 
-        EnrollmentDTO result = fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
-        Enrollment e = enrollmentRepository.findById(result.enrollmentId()).orElse(null);
-        assertNotNull(e);
-        assertEquals("A", e.getGrade());
+        //return Data converted from String to DTO
+        //EnrollmentDTO result = fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
+
+        // check the database for expected value
+        for (EnrollmentDTO dto : dto_list){
+            Enrollment e = enrollmentRepository.findById(dto.enrollmentId()).orElse(null);
+            assertNotNull(e);
+            assertEquals(dto.grade(), e.getGrade());
+        }
+
+        // clean up after test
+        response = mvc.perform(
+                MockMvcRequestBuilders
+                        .delete("/enrollments"))
+                .andReturn().getResponse();
+
+        // check the response code for 200 meaning OK
+        assertEquals(200, response.getStatus());
+
+        // check the database for deletion
+        for (EnrollmentDTO dto : dto_list){
+            Enrollment e = enrollmentRepository.findById(dto.enrollmentId()).orElse(null);
+            assertNull(e);
+        }
     }
 }
