@@ -7,6 +7,7 @@ public record EnrollmentDTO(
         String grade,  // final grade. May be null until instructor enters final grades.
         int studentId,
         String name,
+        String title, // added title
         String email,
         String courseId,
         int sectionId,

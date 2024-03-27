@@ -1,9 +1,7 @@
 package com.cst438.domain;
 
 import jakarta.persistence.*;
-
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 
 @Entity
 public class Assignment {
@@ -11,9 +9,43 @@ public class Assignment {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="assignment_id")
     private int assignmentId;
- 
-    // TODO  complete this class
-    // add additional attributes for title, dueDate
-    // add relationship between assignment and section entities
-    // add getter and setter methods
+
+    @ManyToOne
+    @JoinColumn(name = "section_no", nullable = false)
+    private Section section;
+
+    private String title;
+    private Date dueDate;
+
+    public int getAssignmentId() {
+        return assignmentId;
+    }
+
+    public void setAssignmentId(int assignmentId) {
+        this.assignmentId = assignmentId;
+    }
+
+    public Section getSection() {
+        return section;
+    }
+
+    public void setSection(Section sectionNumber) {
+        this.section = sectionNumber;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
 }

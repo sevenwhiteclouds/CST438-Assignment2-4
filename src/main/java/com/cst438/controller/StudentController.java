@@ -7,14 +7,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class StudentController {
+
+
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    SectionRepository sectionRepository;
 
 
    // student gets transcript showing list of all enrollments
@@ -23,13 +30,37 @@ public class StudentController {
    @GetMapping("/transcripts")
    public List<EnrollmentDTO> getTranscript(@RequestParam("studentId") int studentId) {
 
-       // TODO
-
        // list course_id, sec_id, title, credit, grade in chronological order
        // user must be a student
-	   // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
-       // remove the following line when done
-       return null;
+       // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
+       // irrelevant fields set to null to only return course_id, sec_id, title, credit, and grade
+
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       if (!isStudent(studentId)) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
+
+       List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId);
+       List<EnrollmentDTO> dto_list = new ArrayList<>();
+       for(Enrollment e : enrollments) {
+           dto_list.add(new EnrollmentDTO(
+                   e.getEnrollmentId(),
+                   e.getGrade(),
+                   e.getUser().getId(),
+                   null,
+                   e.getSection().getCourse().getTitle(),
+                   null,
+                   e.getSection().getCourse().getCourseId(),
+                   e.getSection().getSecId(),
+                   e.getSection().getSectionNo(),
+                   null,
+                   null,
+                   null,
+                   e.getSection().getCourse().getCredits(),
+                   e.getSection().getTerm().getYear(),
+                   e.getSection().getTerm().getSemester()));
+       }
+        return dto_list;
    }
 
     // student gets a list of their enrollments for the given year, semester
@@ -41,11 +72,38 @@ public class StudentController {
            @RequestParam("semester") String semester,
            @RequestParam("studentId") int studentId) {
 
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       if (!isStudent(studentId)) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
 
-     // TODO
-	 //  hint: use enrollment repository method findByYearAndSemesterOrderByCourseId
-     //  remove the following line when done
-       return null;
+       List<Enrollment> enrollments = enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId);
+
+       // Checks for invalid year/date
+       if (enrollments.isEmpty()) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No schedule found for query");
+       }
+
+       List<EnrollmentDTO> enrollmentDTOList = new ArrayList<>();
+       enrollments.forEach(e -> enrollmentDTOList.add(new EnrollmentDTO(
+           e.getEnrollmentId(),
+           e.getGrade(),
+           e.getUser().getId(),
+           e.getUser().getName(),
+           e.getSection().getCourse().getTitle(),
+           e.getUser().getEmail(),
+           e.getSection().getCourse().getCourseId(),
+           e.getSection().getSecId(),
+           e.getSection().getSectionNo(),
+           e.getSection().getBuilding(),
+           e.getSection().getRoom(),
+           e.getSection().getTimes(),
+           e.getSection().getCourse().getCredits(),
+           e.getSection().getTerm().getYear(),
+           e.getSection().getTerm().getSemester()
+       )));
+
+       return enrollmentDTOList;
    }
 
 
@@ -57,25 +115,89 @@ public class StudentController {
 		    @PathVariable int sectionNo,
             @RequestParam("studentId") int studentId ) {
 
-        // TODO
+        if (sectionRepository.findById(sectionNo).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This section does not exist.");
+        }
 
-        // check that the Section entity with primary key sectionNo exists
-        // check that today is between addDate and addDeadline for the section
-        // check that student is not already enrolled into this section
-        // create a new enrollment entity and save.  The enrollment grade will
-        // be NULL until instructor enters final grades for the course.
+        // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+        if (!isStudent(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+        }
 
-        // remove the following line when done.
-        return null;
+        Section s = sectionRepository.findById(sectionNo).get();
+        User user = userRepository.findById(studentId).get();
+        Enrollment enrollment = new Enrollment();
+
+        Calendar today = Calendar.getInstance();
+
+        if (today.getTime().before(s.getTerm().getAddDate())){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add date for this section hasn't started yet.");
+        } else if (today.getTime().after(s.getTerm().getAddDeadline())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The add deadline for this section has passed.");
+        }
+
+        Enrollment alreadyEnrolledCheck = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(sectionNo, studentId);
+        if (alreadyEnrolledCheck != null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student is already enrolled in section " + sectionNo);
+        }
+
+        // Create new enrollment entity + save. Grade == NULL
+        enrollment.setSection(s);
+        enrollment.setGrade("NULL");
+        enrollment.setUser(user);
+
+        enrollment = enrollmentRepository.save(enrollment);
+
+        return new EnrollmentDTO(
+            enrollment.getEnrollmentId(),
+            enrollment.getGrade(),
+            enrollment.getUser().getId(),
+            enrollment.getUser().getName(),
+            enrollment.getSection().getCourse().getTitle(),
+            enrollment.getUser().getEmail(),
+            enrollment.getSection().getCourse().getCourseId(),
+            enrollment.getSection().getSecId(),
+            enrollment.getSection().getSectionNo(),
+            enrollment.getSection().getBuilding(),
+            enrollment.getSection().getRoom(),
+            enrollment.getSection().getTimes(),
+            enrollment.getSection().getCourse().getCredits(),
+            enrollment.getSection().getTerm().getYear(),
+            enrollment.getSection().getTerm().getSemester()
+        );
 
     }
 
-    // student drops a course
-    // user must be student
+    // student drops a course. User MUST be student.
    @DeleteMapping("/enrollments/{enrollmentId}")
    public void dropCourse(@PathVariable("enrollmentId") int enrollmentId) {
 
-       // TODO
-       // check that today is not after the dropDeadline for section
+       if (enrollmentRepository.findById(enrollmentId).isEmpty()) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment does not exist.");
+       }
+
+       // Checks if user is a student. TODO: Change will likely be needed when Login security is implemented.
+       int studentId = enrollmentRepository.findById(enrollmentId).get().getUser().getId();
+       if (!isStudent(studentId)) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User ID: " + studentId + " is not a student.");
+       }
+
+       Calendar today = Calendar.getInstance();
+       Enrollment currentEnrollment = enrollmentRepository.findById(enrollmentId).get();
+
+       if (today.getTime().after(currentEnrollment.getSection().getTerm().getDropDeadline())) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Current date is beyond the drop deadline.");
+       }
+
+       // Drops student from course
+       enrollmentRepository.delete(currentEnrollment);
+
+   }
+
+   // Checks if user is a student TODO: Likely will need to be changed once login is implemented
+   private boolean isStudent(int userId) {
+       if (userRepository.findById(userId).isEmpty()) {
+           return false;
+       } else return Objects.equals(userRepository.findById(userId).get().getType(), "STUDENT");
    }
 }
