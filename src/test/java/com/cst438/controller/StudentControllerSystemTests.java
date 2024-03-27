@@ -60,7 +60,7 @@ class StudentControllerSystemTests {
         }
     }
 
-    @Test // student enrolls into a section TODO: View schedule to verify it was added.
+    @Test // student enrolls into a section
     void studentEnrollment() throws Exception {
         final String desiredSection = "11";
 
