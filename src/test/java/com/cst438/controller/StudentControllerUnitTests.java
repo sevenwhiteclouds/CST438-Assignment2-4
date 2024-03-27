@@ -58,6 +58,10 @@ class StudentControllerUnitTests {
 
         assertNotEquals(0, result.enrollmentId());
 
+        assertEquals(section.getCourse().getCourseId(), result.courseId());
+        assertEquals(section.getTerm().getSemester(), result.semester());
+        assertEquals(section.getSectionNo(), result.sectionNo());
+
         Enrollment e = enrollmentRepository.findById(result.enrollmentId()).orElse(null);
         assertNotNull(e);
 
